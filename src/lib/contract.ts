@@ -123,17 +123,25 @@ export class ConfidentialInsuranceClaimsClient {
     }
   }
 
-  // Setters
+  // Setters (CIC + CPWV aliases)
+  public setPolicySecretKey(k: string) { this._policyholderKey = k; }
   public setPolicyholderKey(k: string) { this._policyholderKey = k; }
-  public setIncidentReport(r: string)  { this._incidentReport = r; }
-  public setCoverageDays(d: number)    { this._coverageDays = d; }
-  public setInsurerKey(k: string)      { this._insurerKey = k; }
-
-  // Backward compatibility setters
   public setProductSecretKey(k: string) { this._policyholderKey = k; }
-  public setPurchaseInvoice(i: string)  { this._incidentReport = i; }
-  public setWarrantyDays(d: number)     { this._coverageDays = d; }
-  public setManufacturerKey(k: string)  { this._insurerKey = k; }
+
+  public setClaimIncidentHash(r: string) { this._incidentReport = r; }
+  public setIncidentReport(r: string) { this._incidentReport = r; }
+  public setPurchaseInvoice(i: string) { this._incidentReport = i; }
+  public setPurchaseInvoiceHash(i: string) { this._incidentReport = i; }
+
+  public setCoverageDaysRemaining(d: number | bigint) { this._coverageDays = Number(d); }
+  public setCoverageDays(d: number | bigint) { this._coverageDays = Number(d); }
+  public setWarrantyDays(d: number | bigint) { this._coverageDays = Number(d); }
+  public setWarrantyDaysRemaining(d: number | bigint) { this._coverageDays = Number(d); }
+
+  public setInsurerSigningKey(k: string) { this._insurerKey = k; }
+  public setInsurerKey(k: string) { this._insurerKey = k; }
+  public setManufacturerSigningKey(k: string) { this._insurerKey = k; }
+  public setManufacturerKey(k: string) { this._insurerKey = k; }
 
   public getNetworkConfig(): NetworkConfiguration { return this.networkConfig; }
   public getContractAddress(): string { return this.contractAddress; }
@@ -142,6 +150,7 @@ export class ConfidentialInsuranceClaimsClient {
   public buildContract(): Contract<any> {
     const witnesses: Witnesses<any> = {
       policyholderSecretKey: (ctx) => [ctx, strToBytes32(this._policyholderKey)],
+      policySecretKey: (ctx) => [ctx, strToBytes32(this._policyholderKey)],
       claimProofNonce: (ctx) => {
         const nonce = new Uint8Array(32);
         if (typeof crypto !== "undefined" && crypto.getRandomValues) {
@@ -152,6 +161,7 @@ export class ConfidentialInsuranceClaimsClient {
         return [ctx, nonce];
       },
       incidentReportHash: (ctx) => [ctx, strToBytes32(this._incidentReport)],
+      claimIncidentHash: (ctx) => [ctx, strToBytes32(this._incidentReport)],
       coverageDaysRemaining: (ctx) => [ctx, BigInt(this._coverageDays)],
       insurerSigningKey: (ctx) => [ctx, strToBytes32(this._insurerKey)],
       // Compatibility aliases
