@@ -1,0 +1,61 @@
+pragma language_version 0.23;
+import CompactStandardLibrary;
+
+export ledger claimCount: Counter;
+export ledger revokedCount: Counter;
+export ledger activeSession: Counter;
+export ledger policyId: Bytes<32>;
+export ledger insurerCommitment: Bytes<32>;
+export ledger lastClaimCommitment: Bytes<32>;
+export ledger lastRevokedCommitment: Bytes<32>;
+export ledger minimumCoverageDays: Uint<32>;
+
+witness policyholderSecretKey(): Bytes<32>;
+witness claimProofNonce(): Bytes<32>;
+witness incidentReportHash(): Bytes<32>;
+witness coverageDaysRemaining(): Uint<32>;
+witness insurerSigningKey(): Bytes<32>;
+
+export circuit fileInsuranceClaim(expectedPolicyId: Bytes<32>): Bytes<32> {
+  assert(policyId == expectedPolicyId, "Policy ID mismatch");
+  const policyKey = policyholderSecretKey();
+  const nonce = claimProofNonce();
+  const reportHash = incidentReportHash();
+  const days = coverageDaysRemaining();
+  assert(days >= minimumCoverageDays, "Policy lapsed");
+  const claimCommitment = persistentHash<Vector<5, Bytes<32>>>([
+    pad(32, "cic:claim:submission:v2"),
+    policyKey, nonce, reportHash, pad(32, "cic:session:binding")
+  ]);
+  claimCount.increment(1);
+  lastClaimCommitment = disclose(claimCommitment);
+  return lastClaimCommitment;
+}
+
+export circuit verifyClaim(claimedCommitment: Bytes<32>): Boolean {
+  return disclose(lastClaimCommitment == claimedCommitment);
+}
+
+export circuit revokeClaim(commitmentToRevoke: Bytes<32>): Bytes<32> {
+  const insurerKey = insurerSigningKey();
+  assert(persistentHash<Vector<2, Bytes<32>>>([pad(32, "cic:insurer:authority:v1"), insurerKey]) == insurerCommitment, "Unauthorized");
+  revokedCount.increment(1);
+  lastRevokedCommitment = disclose(commitmentToRevoke);
+  return lastRevokedCommitment;
+}
+
+export circuit setInsurerCommitment(newMinimumDays: Uint<32>): Bytes<32> {
+  insurerCommitment = disclose(persistentHash<Vector<2, Bytes<32>>>([pad(32, "cic:insurer:authority:v1"), insurerSigningKey()]));
+  minimumCoverageDays = newMinimumDays;
+  activeSession.increment(1);
+  return insurerCommitment;
+}
+
+export circuit resetPolicy(newPolicyId: Bytes<32>, newMinimumDays: Uint<32>): Bytes<32> {
+  policyId = disclose(newPolicyId);
+  minimumCoverageDays = newMinimumDays;
+  activeSession.increment(1);
+  return policyId;
+}
+
+export circuit incrementSession(): [] { activeSession.increment(1); }
