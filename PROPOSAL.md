@@ -7,9 +7,9 @@
 
 > **Demonstrates Midnight Lace wallet connection, proof creation, and successful `fileInsuranceClaim()` circuit call from the frontend.**
 
-[![CIC Video Walkthrough](https://img.shields.io/badge/YouTube-Watch%20Live%20Demo-FF0000?style=for-the-badge&logo=youtube)](https://youtu.be/WeqR2uJzXZw)
+[![CIC Video Walkthrough](https://img.shields.io/badge/YouTube-Watch%20Live%20Demo-FF0000?style=for-the-badge&logo=youtube)](https://youtu.be/Owx4iPKKBCs)
 
-**Watch on YouTube**: [https://youtu.be/WeqR2uJzXZw](https://youtu.be/WeqR2uJzXZw)
+**Watch on YouTube**: [https://youtu.be/Owx4iPKKBCs](https://youtu.be/Owx4iPKKBCs)
 
 ---
 
