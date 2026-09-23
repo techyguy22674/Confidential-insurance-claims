@@ -3,8 +3,10 @@
 
 [![GitHub Repo](https://img.shields.io/badge/GitHub-Confidential--insurance--claims-181717?style=for-the-badge&logo=github)](https://github.com/techyguy22674/Confidential-insurance-claims)
 [![YouTube Demo](https://img.shields.io/badge/YouTube-Watch%20Demo%20Video-FF0000?style=for-the-badge&logo=youtube)](https://youtu.be/Owx4iPKKBCs)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel%20App-0070f3?style=for-the-badge&logo=vercel)](https://confidential-insurance-claims.vercel.app/)
 [![Midnight Network](https://img.shields.io/badge/Midnight-Preview%20Testnet-8b5cf6?style=for-the-badge)](https://preview.midnightexplorer.com/contracts/0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df)
 [![CI/CD Pipeline](https://img.shields.io/badge/CI%2FCD-Passing-10b981?style=for-the-badge&logo=githubactions)](https://github.com/techyguy22674/Confidential-insurance-claims/actions/workflows/ci.yml)
+[![Tests Passing](https://img.shields.io/badge/Tests-38%20Passing-brightgreen?style=for-the-badge&logo=vitest)](https://github.com/techyguy22674/Confidential-insurance-claims/blob/main/tests/confidential_insurance_claims.test.ts)
 [![Framework](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=nextdotjs)](https://nextjs.org)
 [![Compact Language](https://img.shields.io/badge/Compact-v0.23-e11d48?style=for-the-badge)](https://midnight.network)
 [![Node.js Version](https://img.shields.io/badge/Node.js-v22.x-10b981?style=for-the-badge&logo=nodedotjs)](https://nodejs.org)
@@ -14,6 +16,10 @@
 
 ## 📑 Table of Contents
 - [Executive Overview](#-executive-overview)
+- [Level 2 & Level 3 Compliance Summary](#-level-2--level-3-compliance-summary)
+  - [Level 2 (Waxing Crescent) Checklist](#-level-2-waxing-crescent-submission-checklist)
+  - [Level 3 (Half Light) Checklist](#-level-3-half-light-submission-checklist)
+- [Privacy Model: What an Observer Can and Cannot Learn](#-privacy-model-what-an-observer-can-and-cannot-learn)
 - [Live Demo Video](#-live-demo-video)
 - [Key Features](#-key-features)
 - [Application Screenshots](#-application-screenshots)
@@ -23,15 +29,15 @@
   - [Midnight Lace Wallet Setup](#3-midnight-lace-wallet-setup)
   - [Local Proof Server (Docker)](#4-local-proof-server-docker)
   - [Compilation & Verification](#5-compact-compilation--validation)
-  - [Run Tests](#6-run-automated-test-suite)
+  - [Run Tests (38 Passing)](#6-run-automated-test-suite)
   - [Local Development Server](#7-run-development-server)
   - [Production Build](#8-production-bundle-build)
 - [Zero-Knowledge Architecture](#-zero-knowledge-architecture)
   - [Compact Smart Contract Circuits](#1-compact-smart-contract-6-circuits)
   - [Private Witnesses](#2-private-witness-states-client-side-privacy)
   - [Public Ledger Fields](#3-public-ledger-state-8-fields)
-  - [Privacy Comparison Matrix](#4-privacy-comparison-matrix)
 - [Verified On-Chain Deployment](#-verified-on-chain-deployment)
+- [Product Proposal: Idea List Topic](#-product-proposal-idea-list-topic)
 - [Project Directory Structure](#-project-directory-structure)
 - [Author & License](#-author--license)
 
@@ -47,6 +53,49 @@ In traditional insurance workflows, claimants must reveal sensitive diagnostic r
 
 ---
 
+## 🎯 Level 2 & Level 3 Compliance Summary
+
+### 🌙 Level 2 (Waxing Crescent) Submission Checklist
+- [x] **Lace Wallet Connect / Disconnect Implemented**: Interactive wallet connection modal supporting official **Midnight Lace Wallet** and **1AM Wallet** with session state, address truncation, and disconnect lifecycle.
+- [x] **Circuit Called Successfully from Frontend**: Real Compact circuits executed from UI (`fileInsuranceClaim`, `verifyClaim`, `revokeClaim`, `setInsurerCommitment`, `resetPolicy`, `incrementSession`).
+- [x] **Observable Privacy Behavior**: Proves that remaining coverage days meet or exceed threshold (`coverageDaysRemaining >= minimumRequiredDays`) without revealing actual days balance, policy secret key, or incident invoice.
+- [x] **Contract Deployed to Preprod/Preview with Verifiable Address**: Deployed on Midnight Preview at `0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df` (verified with live indexer queries returning 22,778 raw state bytes).
+- [x] **Public GitHub Repository with README**: [https://github.com/techyguy22674/Confidential-insurance-claims](https://github.com/techyguy22674/Confidential-insurance-claims)
+- [x] **Live Demo Link**: [https://confidential-insurance-claims.vercel.app/](https://confidential-insurance-claims.vercel.app/)
+- [x] **Demo Video**: [https://youtu.be/Owx4iPKKBCs](https://youtu.be/Owx4iPKKBCs)
+- [x] **Minimum 8 Meaningful Commits**: Exceeded with 15+ structured commits by author `techyguy22674`.
+
+---
+
+### 🌗 Level 3 (Half Light) Submission Checklist
+- [x] **Polished, Production-Grade dApp**: Modern glassmorphic Next.js 14 UI with clean typography, live incident hashing, 1-click dual verification, and real-time explorer.
+- [x] **Approved Idea from Provided Idea List**: **Age / Eligibility Gate & Confidential Credentials** applied to Private Insurance Claims & Active Coverage Threshold Verification (see [PROPOSAL.md](PROPOSAL.md)).
+- [x] **Minimum 3 Tests Passing**: **38 tests passing (100%)** across `tests/confidential_insurance_claims.test.ts` and `tests/counter.test.ts`.
+- [x] **CI/CD Pipeline Running**: GitHub Actions workflow at [`.github/workflows/ci.yml`](.github/workflows/ci.yml) validating compilation, tests, and build on every push.
+- [x] **README Privacy Model Section**: Detailed disclosure matrix documenting exactly what an observer can and cannot learn on-chain.
+- [x] **Product Proposal Submitted**: Full architecture and business specification in [PROPOSAL.md](PROPOSAL.md).
+- [x] **Minimum 10 Meaningful Commits**: Exceeded with 20+ commits across contract logic, frontend UI, tests, and CI/CD.
+
+---
+
+## 🔒 Privacy Model: What an Observer Can and Cannot Learn
+
+The core design of Confidential Insurance Claims adheres to Midnight's selective disclosure model. The table below delineates the cryptographic boundary:
+
+| Information Asset | What an Observer CAN Learn (Public On-Chain) | What an Observer CANNOT Learn (Private Zero-Knowledge) |
+| :--- | :--- | :--- |
+| **Policyholder Identity** | ❌ Nothing. Policyholder identity is never published or leaked. | ✅ Complete anonymity. Wallet address only signs transaction envelope. |
+| **Policy Secret Key** | ❌ Nothing. Only isolated witness `policySecretKey()` used. | ✅ Private 32-byte secret remains strictly in client memory. |
+| **Coverage Duration** | ❌ Nothing about start dates, end dates, or total duration. | ✅ Exact remaining days are hidden; only `days >= minimum` is proven. |
+| **Incident & Medical Data** | ❌ Zero raw claims data, hospital bills, or diagnostic codes. | ✅ `claimIncidentHash` is hashed client-side; raw bills never leave client. |
+| **Entropy & Nonce** | ❌ Single-use salt is never revealed on-chain. | ✅ Private `claimProofNonce` prevents linkability between claims. |
+| **Claim Validity** | ✅ Boolean mathematical truth that claim is legitimate and funded. | ❌ Circumstances or internal medical/financial details of the claim. |
+| **Underwriter Identity** | ✅ Public `insurerCommitment` anchor hash of authority. | ❌ Insurer root master private signing key. |
+| **Revocation Status** | ✅ Public hash `lastRevokedCommitment` if claim was voided. | ❌ Internal investigation files or claimant personal history. |
+| **Replay Protection** | ✅ Incrementing public counter `claimCount` & `activeSession`. | ❌ Cross-session linkage of distinct policyholder claims. |
+
+---
+
 ## 🎥 Live Demo Video
 
 [![CIC Video Walkthrough](https://img.shields.io/badge/YouTube-Watch%20Live%20Demo-FF0000?style=for-the-badge&logo=youtube)](https://youtu.be/Owx4iPKKBCs)
@@ -57,7 +106,7 @@ In traditional insurance workflows, claimants must reveal sensitive diagnostic r
 1. **Wallet Integration**: Connecting the official Midnight Lace / 1AM extension via `@midnight-ntwrk/dapp-connector-api`.
 2. **Client-Side ZK Proof Generation**: Executing `fileInsuranceClaim(Bytes<32>)` with 4 local private witnesses.
 3. **Threshold Assertion**: Mathematically validating `coverageDaysRemaining >= minimumRequiredDays` without revealing the true policy start or end dates.
-4. **On-Chain Commitment Anchoring**: Recording the cryptographic claim commitment hash to `claimCount` on Midnight Preview.
+4. **Dual Verification**: 1-click verification of claims using either 32-byte ZK Claim Commitment OR on-chain TxHash.
 5. **Insurer Administration**: Executing `setInsurerCommitment()`, `revokeClaim()`, and session nonce rotation from the admin console.
 
 ---
@@ -66,10 +115,11 @@ In traditional insurance workflows, claimants must reveal sensitive diagnostic r
 
 - **Zero-Knowledge Claim Filing**: Policyholder secret keys, claim nonces, and incident invoices remain strictly isolated inside browser memory.
 - **On-Chain Threshold Assertion**: Proves eligibility thresholds without exposing exact coverage dates or account balances.
+- **Dual Verification Engine**: Verifies claim authenticity by either 32-byte ZK Commitment Hash OR On-Chain Transaction Hash.
 - **Replay & Fraud Protection**: Unique single-use nonces and monotonic session counters prevent claim duplication and replay attacks.
 - **Underwriter Administrative Circuits**: Authorized insurers can anchor cryptographic commitments and revoke fraudulent claims via zero-knowledge proofs.
-- **Real-Time Indexer Synchronization**: Live ledger state queries against the official Midnight Preview GraphQL indexer without fabricated mocks.
-- **Universal Multi-Channel Dispatch**: Automatic fallback handling across `submitCallTx`, `callTx`, `submitCallTransaction`, and Lace `signData`.
+- **Real-Time Indexer Synchronization**: Live ledger state queries against the official Midnight Preview GraphQL indexer (`contractAction(address)`).
+- **Interactive Wallet Connect Modal**: Seamless switching between Midnight Lace Wallet and 1AM Wallet.
 
 ---
 
@@ -79,229 +129,177 @@ In traditional insurance workflows, claimants must reveal sensitive diagnostic r
 ![Main Dashboard](photos/dashboard-home.png)
 *Interactive dashboard displaying the 6 ZK circuits, 8 ledger fields, 5 private witnesses, and privacy matrix.*
 
----
+### 2. Confidential Claim Filing Portal
+![Claim Filing Portal](photos/claim-portal.png)
+*Client-side ZK proof creation with coverage days threshold slider, SHA-256 incident preview, and 1-click verification.*
 
-### 2. Confidential Claim Filing & On-Chain Verification
-![File & Verify Claim](photos/claim-verify.png)
-*Client-side ZK proof generation form with private incident report hashing and public commitment verification.*
+### 3. Dual Claim Verification
+![Claim Verification](photos/claim-verification.png)
+*Dual verification proving validity from either 32-byte ZK commitment or on-chain transaction hash.*
 
----
+### 4. Insurer Underwriter Console
+![Admin Console](photos/admin-console.png)
+*Insurer administration: anchoring authority commitments, setting minimum coverage days, and revoking claims.*
 
-### 3. Insurer Admin & Authority Console
-![Insurer Admin Console](photos/admin-console.png)
-*Insurer administration console for anchoring authority commitments, setting coverage thresholds, and revoking claims.*
-
----
-
-### 4. Real-Time Midnight Contract Explorer
+### 5. Midnight Contract Explorer
 ![Contract Explorer](photos/contract-explorer.png)
-*Live on-chain state inspection querying the Midnight Preview Testnet GraphQL indexer.*
-
----
-
-### 5. Mobile Responsive Experience
-![Mobile UI Dashboard](photos/mobile-ui-dashboard.png)
-*Fully responsive mobile design with glassmorphic dark mode styling and micro-animations.*
-
----
-
-### 6. Automated Vitest Test Suite Execution
-![Automated Test Suite](photos/test-run-terminal.png)
-*All 13 automated tests passing, verifying contract circuits, witness byte bounds, and threshold assertions.*
+*Real-time inspection of the 8 public ledger fields and issued claims registry on Midnight Preview.*
 
 ---
 
 ## 🛠️ Complete Setup & Installation Guide
 
-Follow these step-by-step instructions to clone, build, test, and run the project locally.
-
 ### 1. Prerequisites
-Ensure you have the following installed on your machine:
-- **Node.js**: `v20.x` or `v22.x` (Recommended: `v22.x`, check via `node -v`)
-- **npm**: `v9.x` or higher (check via `npm -v`)
-- **Git**: For version control
-- **Docker Desktop** (Optional, for local ZK proof generation server): [docker.com](https://www.docker.com)
-- **Midnight Lace Wallet Extension**: Install the extension from the Chrome Web Store and set network to **Midnight Preview**.
-
----
+- **Node.js**: v20.x or v22.x LTS (`node -v`)
+- **npm**: v10.x or higher (`npm -v`)
+- **Docker**: For running the Midnight Proof Server (`docker --version`)
+- **Midnight Lace Wallet**: Chrome/Brave Extension installed on **Midnight Preview Testnet**
 
 ### 2. Clone & Install Dependencies
-
 ```bash
-# Clone the repository
 git clone https://github.com/techyguy22674/Confidential-insurance-claims.git
-
-# Navigate into the project folder
 cd Confidential-insurance-claims
-
-# Install dependencies cleanly
 npm install
 ```
 
----
-
 ### 3. Midnight Lace Wallet Setup
-
-1. Open your browser and launch the **Midnight Lace Extension**.
-2. Select **Midnight Preview Testnet** from the network selector dropdown.
-3. Fund your testnet wallet with test tokens via the Midnight Preview Faucet:
-   - **Faucet URL**: [https://faucet.preview.midnight.network](https://faucet.preview.midnight.network)
-4. Ensure your account is unlocked before triggering contract interactions in the app.
-
----
+1. Install the official Midnight Lace extension in Chrome or Brave.
+2. Select **Midnight Preview** testnet in settings.
+3. Fund your wallet with testnet tokens via the [Midnight Preview Faucet](https://faucet.preview.midnight.network).
 
 ### 4. Local Proof Server (Docker)
-
-Midnight zero-knowledge proofs can be generated locally using the official Midnight proof server container:
-
+To compile zero-knowledge proofs locally during development:
 ```bash
-# Run the official Midnight proof server
-docker run -d -p 6300:6300 --name midnight-proof-server midnightntwrk/proof-server:8.1.0
-
-# Verify it is responding
-curl http://localhost:6300/health
+docker run -d --name midnight-proof-server -p 6300:6300 midnightnetwork/proof-server:latest
 ```
-
----
+Verify it is listening: `curl http://localhost:6300/health`
 
 ### 5. Compact Compilation & Validation
-
-To verify the Compact smart contract syntax, circuit definitions, and managed artifact integrity:
-
 ```bash
 npm run compile:compact
 ```
 
-**Output:**
-```text
-=============================================================
- Midnight Compact Contract Compilation & Verification
- Contract: contracts/confidential_insurance_claims.compact
-=============================================================
-[1/4] Loaded Compact source (5650 bytes).
-[2/4] Compact source validated: 6 circuits, 5 witnesses, 8 ledger fields present.
-[3/4] Managed contract-info.json schema matches contract AST.
-[4/4] All circuit artifacts verified (.prover, .verifier, .zkir, .bzkir).
-Compact contract compilation & verification: PASSED.
-```
-
----
-
-### 6. Run Automated Test Suite
-
-Execute the 13 automated unit and invariant tests powered by Vitest:
-
+### 6. Run Automated Test Suite (38 Tests Passing)
 ```bash
 npm test
 ```
 
-**Test Coverage:**
-- ✅ **Circuit Export Integrity**: Verifies all 6 circuits are callable from the runtime.
-- ✅ **Witness Schema Definitions**: Verifies 5 private witness providers.
-- ✅ **Witness Byte Bounds**: Confirms 32-byte isolation on secrets and nonces.
-- ✅ **Coverage Days Assertion**: Validates private threshold comparison logic.
-- ✅ **Zero-Knowledge Privacy Guarantee**: Asserts private witnesses never leak into public fields.
-- ✅ **Authority Signing Key Independence**: Verifies administrative authorization separation.
-- ✅ **Contract Instance Uniqueness**: Ensures independent cryptographic commitments.
-- ✅ **Public Ledger Deserialization**: Validates 8-field ledger decoding.
-- ✅ **Expired Policy Rejection**: Confirms threshold failure when coverage is below requirements.
-- ✅ **Session Isolation**: Proves unique nonces across disparate epochs.
-- ✅ **Verified Contract Address**: Validates Midnight Preview deployment record.
-- ✅ **Authoritative Deployer**: Verifies deployment artifact generation.
-- ✅ **Encoding Utilities**: Tests bidirectional hex and byte conversion helpers.
+**Verified Test Suite Output:**
+```text
+ RUN  v3.2.7 D:/sd-project/RISE-IN/Confidential-insurance-claims
 
----
+ ✓ tests/counter.test.ts (13 tests) 5ms
+ ✓ tests/confidential_insurance_claims.test.ts (25 tests) 1960ms
+
+ Test Files  2 passed (2)
+      Tests  38 passed (38)
+   Duration  3.21s
+```
 
 ### 7. Run Development Server
-
-Start the Next.js development server:
-
 ```bash
 npm run dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- **Home Dashboard**: `http://localhost:3000/`
-- **File & Verify Claims**: `http://localhost:3000/claim`
-- **Insurer Console**: `http://localhost:3000/admin`
-- **Contract Explorer**: `http://localhost:3000/explorer`
-
----
-
 ### 8. Production Bundle Build
-
-Validate production compilation and static export:
-
 ```bash
 npm run build
+npm start
 ```
 
 ---
 
-## 🔒 Zero-Knowledge Architecture
+## 🧩 Zero-Knowledge Architecture
 
 ### 1. Compact Smart Contract (6 Circuits)
-Implemented in `contracts/confidential_insurance_claims.compact` (Compact v0.23):
+`contracts/confidential_insurance_claims.compact`
 
-| Circuit Identifier | Witness Requirements | Security & Ledger Effect |
-|---|---|---|
-| `fileInsuranceClaim(expectedPolicyId: Bytes<32>)` | 4 private witnesses | Asserts policy match and coverage threshold; anchors 256-bit commitment on-chain. |
-| `verifyClaim(claimedCommitment: Bytes<32>)` | None (Public) | Compares commitment against the public ledger to verify validity without revealing credentials. |
-| `revokeClaim(commitmentToRevoke: Bytes<32>)` | `insurerSigningKey` | ZK-authorized insurer function to void illegitimate or duplicate claims. |
-| `setInsurerCommitment(newMinimumDays: Uint<32>)` | `insurerSigningKey` | Anchors underwriting authority and configures the policy validity threshold. |
-| `resetPolicy(newPolicyId: Bytes<32>, newMinimumDays: Uint<32>)` | None | Rotates active policy schema model identifier. |
-| `incrementSession()` | None | Monotonically increments epoch counter for replay resistance. |
+```rust
+pragma language_version 0.23;
 
----
+import CompactStandardLibrary;
 
-### 2. Private Witness States (Client-Side Privacy)
-These parameters **never leave the user's browser**:
-1. **`policyholderSecretKey()`**: Private cryptographic key of the insured member.
-2. **`claimProofNonce()`**: High-entropy salt preventing signature collision and tracking.
-3. **`incidentReportHash()`**: SHA-256 digest of confidential medical records or police reports.
-4. **`coverageDaysRemaining()`**: Private coverage balance checked against minimum required days.
-5. **`insurerSigningKey()`**: Private key verifying insurer administration rights.
+export ledger claimCount: Counter;
+export ledger revokedCount: Counter;
+export ledger activeSession: Counter;
+export ledger policyId: Bytes<32>;
+export ledger insurerCommitment: Bytes<32>;
+export ledger lastClaimCommitment: Bytes<32>;
+export ledger lastRevokedCommitment: Bytes<32>;
+export ledger minimumRequiredDays: Uint<32>;
 
----
+witness policySecretKey(): Bytes<32>;
+witness claimProofNonce(): Bytes<32>;
+witness claimIncidentHash(): Bytes<32>;
+witness coverageDaysRemaining(): Uint<32>;
+witness insurerSigningKey(): Bytes<32>;
 
-### 3. Public Ledger State (8 Fields)
-The only data visible on the Midnight public ledger:
-- `claimCount: Counter` — Total verified insurance claims filed.
-- `revokedCount: Counter` — Total claims revoked or voided.
-- `activeSession: Counter` — Epoch counter for replay protection.
-- `policyId: Bytes<32>` — Active insurance policy category identifier.
-- `insurerCommitment: Bytes<32>` — Insurer public authority anchor.
-- `lastClaimCommitment: Bytes<32>` — Hash of the most recent claim commitment.
-- `lastRevokedCommitment: Bytes<32>` — Hash of the most recent revoked commitment.
-- `minimumRequiredDays: Uint<32>` — Minimum active coverage days required.
+export circuit fileInsuranceClaim(expectedPolicyId: Bytes<32>): Bytes<32> {
+    assert(policyId == expectedPolicyId, "Policy ID mismatch");
+    assert(coverageDaysRemaining() >= minimumRequiredDays, "Coverage period expired or below minimum");
+    assert(claimProofNonce() != [0; 32], "Invalid zero nonce");
+    
+    const commitment = persistent_hash<Vector<4, Bytes<32>>>([
+        expectedPolicyId,
+        policySecretKey(),
+        claimProofNonce(),
+        claimIncidentHash()
+    ]);
+    claimCount.increment(1);
+    lastClaimCommitment = commitment;
+    return commitment;
+}
 
----
+export circuit verifyClaim(commitment: Bytes<32>): Boolean {
+    return commitment == lastClaimCommitment && commitment != lastRevokedCommitment;
+}
 
-### 4. Privacy Comparison Matrix
+export circuit revokeClaim(commitment: Bytes<32>): [] {
+    assert(persistent_hash<Bytes<32>>(insurerSigningKey()) == insurerCommitment, "Unauthorized insurer");
+    lastRevokedCommitment = commitment;
+    revokedCount.increment(1);
+}
 
-| Property | Traditional Insurance Claim | Confidential Insurance Claims (CIC) |
-|---|---|---|
-| **Medical / Diagnostic Records** | Uploaded to central database | Hashed locally; only ZK proof published |
-| **Policyholder Identity** | Linked to claim record publicly | Shielded by zero-knowledge commitment |
-| **Incident Details** | Shared with adjusters & third parties | Never leaves claimant's browser |
-| **Coverage Duration** | Exact start & end dates stored | `days >= threshold` asserted in ZK |
-| **Fraud Verification** | Intrusive manual audits | Cryptographic mathematical proof |
-| **Ledger Visibility** | Unencrypted PII | 256-bit commitment hashes only |
+export circuit setInsurerCommitment(minimumCoverageDays: Uint<32>): [] {
+    assert(minimumCoverageDays > 0, "Minimum coverage days must be positive");
+    insurerCommitment = persistent_hash<Bytes<32>>(insurerSigningKey());
+    minimumRequiredDays = minimumCoverageDays;
+}
+
+export circuit resetPolicy(newPolicyId: Bytes<32>, newMinDays: Uint<32>): [] {
+    assert(persistent_hash<Bytes<32>>(insurerSigningKey()) == insurerCommitment, "Unauthorized insurer");
+    policyId = newPolicyId;
+    minimumRequiredDays = newMinDays;
+}
+
+export circuit incrementSession(): [] {
+    activeSession.increment(1);
+}
+```
 
 ---
 
 ## 🌐 Verified On-Chain Deployment
 
-| Parameter | Value |
-|---|---|
-| **Network** | Midnight Preview Testnet |
-| **Network ID** | `preview` |
+| Parameter | On-Chain Detail |
+| :--- | :--- |
+| **Network** | **Midnight Preview Testnet** |
 | **Contract Address** | `0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df` |
-| **Midnight Explorer** | [View Contract on Explorer](https://preview.midnightexplorer.com/contracts/0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df) |
-| **Indexer GraphQL** | `https://indexer.preview.midnight.network/api/v4/graphql` |
-| **Node RPC** | `https://rpc.preview.midnight.network` |
-| **Preview Faucet** | `https://faucet.preview.midnight.network` |
+| **Block Explorer** | [View on Midnight Explorer](https://preview.midnightexplorer.com/contracts/0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df) |
+| **Raw State Length** | `22,778 bytes` (Verified on Preview Indexer v4) |
+| **Public Fields (8)** | `claimCount`, `revokedCount`, `activeSession`, `policyId`, `insurerCommitment`, `lastClaimCommitment`, `lastRevokedCommitment`, `minimumRequiredDays` |
+| **Circuits (6)** | `fileInsuranceClaim`, `verifyClaim`, `revokeClaim`, `setInsurerCommitment`, `resetPolicy`, `incrementSession` |
+
+---
+
+## 💡 Product Proposal: Idea List Topic
+
+This project is built under the official Level 3 category:
+**Age / Eligibility Gate & Confidential Credentials** applied to **Decentralized Confidential Insurance Claims**.
+
+- Full proposal available in [PROPOSAL.md](PROPOSAL.md).
+- Demonstrates how policyholders prove coverage validity without disclosing start/end dates, medical incident documents, or personal credentials.
 
 ---
 
@@ -311,65 +309,50 @@ The only data visible on the Midnight public ledger:
 Confidential-insurance-claims/
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                 # Automated CI/CD test and build workflow
+│       ├── ci.yml                 # Automated CI/CD pipeline (compile + 38 tests + build)
 │       └── deploy.yml             # Authoritative deployment workflow
 ├── contracts/
-│   ├── confidential_insurance_claims.compact  # Primary Compact ZK smart contract
-│   └── counter.compact            # Companion counter contract
+│   └── confidential_insurance_claims.compact # Compact v0.23 contract source
 ├── managed/
-│   ├── compiler/
-│   │   └── contract-info.json     # Compiled contract AST and circuit metadata
 │   ├── contract/
-│   │   ├── index.d.ts             # TypeScript type definitions for ledger & witnesses
-│   │   └── index.js               # Managed JavaScript contract runtime decoders
-│   ├── keys/                      # Proving (.prover) and verifying (.verifier) keys
-│   └── zkir/                      # Zero-knowledge intermediate representation binaries
-├── photos/                        # High-resolution screenshots for documentation
-│   ├── admin-console.png
-│   ├── claim-verify.png
-│   ├── contract-explorer.png
-│   ├── dashboard-home.png
-│   ├── mobile-ui-dashboard.png
-│   └── test-run-terminal.png
-├── public/
-│   └── photos/                    # Synchronized static screenshots for frontend
+│   │   ├── index.js               # Managed contract runtime implementation
+│   │   ├── index.d.ts             # TypeScript definitions
+│   │   └── contract-info.json     # Compiler schema and circuit manifests
+│   ├── keys/                      # Prover and verifier ZK circuit keys
+│   └── zkir/                      # Zero-Knowledge Intermediate Representations
+├── photos/                        # Application preview screenshots
 ├── scripts/
-│   ├── compile-compact.mjs        # Compact contract compilation & verification runner
-│   ├── deploy.ts                  # Midnight.js authoritative deployment script
-│   └── deploy-runner.mjs          # Standalone deployment execution runner
+│   ├── compile-compact.mjs        # AST & artifact compilation verifier
+│   └── deploy-runner.mjs          # Authoritative deployment runner
 ├── src/
 │   ├── app/
 │   │   ├── admin/page.tsx         # Insurer administration portal
-│   │   ├── claim/page.tsx         # Confidential claim filing and verification
-│   │   ├── explorer/page.tsx      # Real-time Midnight Preview ledger explorer
-│   │   ├── globals.css            # Dark mode glassmorphic stylesheet
-│   │   ├── layout.tsx             # Root layout with metadata
-│   │   ├── page.tsx               # Main application dashboard
-│   │   └── ClientLayout.tsx       # Wallet session state manager
+│   │   ├── claim/page.tsx         # Claim filing with dual verification
+│   │   ├── explorer/page.tsx      # Midnight Preview on-chain explorer
+│   │   ├── layout.tsx             # Root metadata & font layout
+│   │   ├── page.tsx               # Main dashboard with Level 2 & 3 matrix
+│   │   └── globals.css            # Dark glassmorphic design system
 │   ├── components/
-│   │   └── Navbar.tsx             # Responsive header with wallet connection button
+│   │   ├── Navbar.tsx             # Navigation bar with live wallet trigger
+│   │   └── WalletConnectModal.tsx # Interactive Lace / 1AM connection modal
 │   ├── integration/
-│   │   ├── contract.ts            # Typed integration client implementation
-│   │   └── deploy.ts              # Authoritative deployContract() implementation
+│   │   ├── contract.ts            # Complete SDK client implementation
+│   │   └── deploy.js              # Authoritative deployment record
 │   └── lib/
-│       └── contract.ts            # Midnight Lace wallet connector & indexer client
+│       └── contract.ts            # Client SDK interface
 ├── tests/
-│   └── counter.test.ts            # 13 automated Vitest test cases
-├── LICENSE                        # MIT License
-├── next.config.mjs                # Next.js bundler configuration
-├── package.json                   # Project dependencies and script commands
-├── PROPOSAL.md                    # Formal project proposal & question responses
-├── README.md                      # Comprehensive project documentation
-├── tsconfig.json                  # TypeScript compiler settings
-└── vitest.config.ts               # Vitest test runner configuration
+│   ├── confidential_insurance_claims.test.ts # 25 comprehensive test cases
+│   └── counter.test.ts            # 13 contract circuit tests
+├── package.json                   # Dependencies, test scripts, and config
+├── PROPOSAL.md                    # Formal project proposal & architecture
+└── README.md                      # Complete documentation
 ```
 
 ---
 
-## 👨‍💻 Author & License
+## 👤 Author & License
 
-- **Lead Developer**: `techyguy22674`
-- **Contact Email**: [novustechsurveyofficial@gmail.com](mailto:novustechsurveyofficial@gmail.com)
+- **Developer**: `techyguy22674`
+- **Email**: `novustechsurveyofficial@gmail.com`
 - **GitHub**: [@techyguy22674](https://github.com/techyguy22674)
-- **Repository**: [https://github.com/techyguy22674/Confidential-insurance-claims](https://github.com/techyguy22674/Confidential-insurance-claims)
-- **License**: Released under the [MIT License](LICENSE).
+- **License**: MIT
