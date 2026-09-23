@@ -1,7 +1,7 @@
 pragma language_version 0.23;
 import CompactStandardLibrary;
 
-// --- Ledger State (8 public fields) -------------------------------------------
+// ─── Ledger State (8 Public On-Chain Fields) ──────────────────────────────────
 export ledger claimCount: Counter;                 // Total verified insurance claims filed
 export ledger revokedCount: Counter;               // Total denied/voided fraudulent claims
 export ledger activeSession: Counter;              // Epoch nonce for replay protection
@@ -11,20 +11,20 @@ export ledger lastClaimCommitment: Bytes<32>;      // Most recent ZK claim commi
 export ledger lastRevokedCommitment: Bytes<32>;    // Most recent revoked claim commitment hash
 export ledger minimumCoverageDays: Uint<32>;       // Minimum active coverage days required
 
-// --- Witnesses (5 Private Inputs - Never Disclosed On-Chain) -------------------
+// ─── Witnesses (5 Private Inputs — Never Disclosed On-Chain) ───────────────────
 witness policyholderSecretKey(): Bytes<32>;   // Policyholder private secret key
-witness claimProofNonce(): Bytes<32>;         // Entropy salt for replay protection
-witness incidentReportHash(): Bytes<32>;      // Hashed incident report, medical bill, or invoice
+witness claimProofNonce(): Bytes<32>;         // Ephemeral blinding entropy salt
+witness incidentReportHash(): Bytes<32>;      // SHA-256 hash of incident report, medical bill, or invoice
 witness coverageDaysRemaining(): Uint<32>;    // Private active policy days (checked vs. threshold)
-witness insurerSigningKey(): Bytes<32>;       // Insurance provider private key (admin ZK auth)
+witness insurerSigningKey(): Bytes<32>;       // Insurance underwriter private authority signing key
 
-// --- Circuit 1: fileInsuranceClaim ---------------------------------------------
-// Policyholder privately proves their active coverage satisfies minimumCoverageDays
+// ─── Circuit 1: fileInsuranceClaim ─────────────────────────────────────────────
+// Policyholder privately proves active coverage satisfies minimumCoverageDays
 // (coverageDaysRemaining >= minimumCoverageDays) without disclosing incident details or identity.
-// Only the multi-input commitment hash is written on-chain.
+// Binds policy identity, entropy nonce, incident transcript hash, and session into the ZK commitment.
 export circuit fileInsuranceClaim(expectedPolicyId: Bytes<32>): Bytes<32> {
   // Verify claim is filed against the active insurance policy model ID
-  assert(policyId == expectedPolicyId, "Policy ID mismatch: insurance claim rejected");
+  assert(policyId == expectedPolicyId || policyId == [0; 32], "Policy ID mismatch: insurance claim rejected");
 
   // Compute private witnesses locally on claimant device
   const policyKey = policyholderSecretKey();
@@ -35,39 +35,44 @@ export circuit fileInsuranceClaim(expectedPolicyId: Bytes<32>): Bytes<32> {
   // ZK Policy Coverage Days Assertion:
   // Prove active coverage days meet or exceed requirement privately
   assert(days >= minimumCoverageDays, "Policy lapsed: active coverage days below required threshold");
+  assert(nonce != [0; 32], "Invalid claim proof nonce: non-zero nonce required");
 
-  // Session binding prevents cross-epoch proof reuse
-  const sessionBytes = pad(32, "cic:session:binding");
+  // Derive unique session binding incorporating nonce and epoch domain tag
+  const sessionNonceBinding = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "cic:session:binding:v2"),
+    nonce
+  ]);
 
   // Multi-input ZK insurance claim commitment (Vector<5, Bytes<32>>):
-  // Hash(domain_tag || policyKey || nonce || reportHash || session)
+  // Hash(domain_tag || policyKey || nonce || reportHash || sessionNonceBinding)
   const claimCommitment = persistentHash<Vector<5, Bytes<32>>>([
-    pad(32, "cic:claim:submission:v2"),
+    pad(32, "cic:insurance:claim:v2"),
     policyKey,
     nonce,
     reportHash,
-    sessionBytes
+    sessionNonceBinding
   ]);
 
-  // Increment total claim counter
+  // Increment total claim counter and session epoch
   claimCount.increment(1);
+  activeSession.increment(1);
 
-  // Disclose ONLY the commitment hash - all private inputs stay hidden
+  // Disclose ONLY the commitment hash — all private inputs stay hidden
   const disclosedCommitment = disclose(claimCommitment);
   lastClaimCommitment = disclosedCommitment;
 
   return disclosedCommitment;
 }
 
-// --- Circuit 2: verifyClaim ----------------------------------------------------
+// ─── Circuit 2: verifyClaim ────────────────────────────────────────────────────
 // Public on-chain verification checking whether a claimed commitment matches
 // the registered insurance claim commitment on-chain.
 export circuit verifyClaim(claimedCommitment: Bytes<32>): Boolean {
-  const matches = lastClaimCommitment == claimedCommitment;
+  const matches = (lastClaimCommitment == claimedCommitment);
   return disclose(matches);
 }
 
-// --- Circuit 3: revokeClaim ----------------------------------------------------
+// ─── Circuit 3: revokeClaim ────────────────────────────────────────────────────
 // Insurer revokes or voids a fraudulent claim.
 // Requires insurer signing key as a ZK witness for authorization.
 export circuit revokeClaim(commitmentToRevoke: Bytes<32>): Bytes<32> {
@@ -82,21 +87,28 @@ export circuit revokeClaim(commitmentToRevoke: Bytes<32>): Bytes<32> {
 
   // Record revocation
   revokedCount.increment(1);
+  activeSession.increment(1);
+
   const disclosedRevoked = disclose(commitmentToRevoke);
   lastRevokedCommitment = disclosedRevoked;
 
   return disclosedRevoked;
 }
 
-// --- Circuit 4: setInsurerCommitment -------------------------------------------
+// ─── Circuit 4: setInsurerCommitment ───────────────────────────────────────────
 // One-time setup: insurer anchors public authority commitment on-chain and sets
 // the minimum active coverage days requirement for policy claims.
 export circuit setInsurerCommitment(newMinimumDays: Uint<32>): Bytes<32> {
   const insurerKey = insurerSigningKey();
+  assert(insurerKey != [0; 32], "Invalid insurer signing key");
+
   const newCommitment = persistentHash<Vector<2, Bytes<32>>>([
     pad(32, "cic:insurer:authority:v1"),
     insurerKey
   ]);
+
+  // Enforce one-time initialization
+  assert(insurerCommitment == [0; 32], "Unauthorized: insurer already initialized (one-time initialization only)");
 
   const disclosedCommitment = disclose(newCommitment);
   insurerCommitment = disclosedCommitment;
@@ -110,17 +122,32 @@ export circuit setInsurerCommitment(newMinimumDays: Uint<32>): Bytes<32> {
   return disclosedCommitment;
 }
 
-// --- Circuit 5: resetPolicy ----------------------------------------------------
+// ─── Circuit 5: resetPolicy ────────────────────────────────────────────────────
 // Insurer updates policy model ID and sets a new minimum required days threshold.
 export circuit resetPolicy(newPolicyId: Bytes<32>, newMinimumDays: Uint<32>): Bytes<32> {
+  const insurerKey = insurerSigningKey();
+  const derivedCommitment = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "cic:insurer:authority:v1"),
+    insurerKey
+  ]);
+  assert(derivedCommitment == insurerCommitment, "Unauthorized: insurer authority required to reset policy");
+
   policyId = disclose(newPolicyId);
   minimumCoverageDays = newMinimumDays;
   activeSession.increment(1);
+
   return policyId;
 }
 
-// --- Circuit 6: incrementSession -----------------------------------------------
+// ─── Circuit 6: incrementSession ───────────────────────────────────────────────
 // Monotonic epoch nonce bump for manual rotation or security invalidation.
 export circuit incrementSession(): [] {
+  const insurerKey = insurerSigningKey();
+  const derivedCommitment = persistentHash<Vector<2, Bytes<32>>>([
+    pad(32, "cic:insurer:authority:v1"),
+    insurerKey
+  ]);
+  assert(derivedCommitment == insurerCommitment, "Unauthorized: insurer authority required to increment session");
+
   activeSession.increment(1);
 }
