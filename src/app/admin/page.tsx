@@ -34,7 +34,7 @@ export default function AdminPage() {
       const res = await client.setInsurerCommitment(insurerMinDays);
       setResult({ ...res, circuit: "setInsurerCommitment(Uint<32>)" });
       addLog("> [SUCCESS] Insurer commitment anchored on-chain!", "success");
-      addLog(`> [COMMITMENT] ${res.insurerCommitment || res.manufacturerCommitment}`, "success");
+      addLog(`> [COMMITMENT] ${res.insurerCommitment || res.insurerCommitment}`, "success");
       addLog(`> [THRESHOLD] minimumRequiredDays set to ${res.newMinimumDays} days`, "success");
       addLog(`> [TXHASH] ${res.txHash}`, "success");
     } catch (err: any) { addLog(`> [ERROR] ${err?.message || err}`, "error"); }
@@ -63,7 +63,7 @@ export default function AdminPage() {
       addLog(`> [CIRCUIT] Executing resetPolicy("${policyId}", ${resetMinDays} days)...`, "info");
       const res = await getClient().resetPolicy(policyId, resetMinDays);
       setResult({ ...res, circuit: "resetPolicy(Bytes<32>, Uint<32>)" });
-      addLog(`> [SUCCESS] Policy offering updated! New Policy ID: ${res.newPolicyId || res.newProductId}`, "success");
+      addLog(`> [SUCCESS] Policy offering updated! New Policy ID: ${res.newPolicyId || res.newPolicyId}`, "success");
       addLog(`> [THRESHOLD] minimumRequiredDays updated to ${res.newMinimumDays} days`, "success");
       addLog(`> [TXHASH] ${res.txHash}`, "success");
     } catch (err: any) { addLog(`> [ERROR] ${err?.message || err}`, "error"); }
