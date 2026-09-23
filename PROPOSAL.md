@@ -13,6 +13,13 @@
 
 ---
 
+## Selected Problem from Idea List
+> **Idea Category**: **Age / Eligibility Gate & Confidential Credentials**  
+> **Application Domain**: **Private Insurance Claims & Active Coverage Verification**  
+> **Privacy Principle**: Prove eligibility threshold (`coverageDaysRemaining >= minimumRequiredDays`) and credential validity without revealing the underlying policy details, start/end dates, medical incident documents, or personal credentials.
+
+---
+
 ## Question 1: What is the application?
 
 **Confidential Insurance Claims (CIC)** is a decentralized, privacy-preserving insurance claim and policy verification platform built on the Midnight Network using Compact zero-knowledge smart contracts and the official **Midnight.js SDK** (`@midnight-ntwrk/dapp-connector-api`, `@midnight-ntwrk/midnight-js-network-id`, `@midnight-ntwrk/compact-runtime`, `@midnight-ntwrk/midnight-js-contracts`).
