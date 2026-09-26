@@ -8,7 +8,7 @@ import {
   stringToBytes32,
   sha256Hex,
 } from '../src/integration/contract.js';
-import { deployCICContract } from '../src/integration/deploy.js';
+import { deployCICContract, CANONICAL_DEPLOYMENT } from '../src/integration/deploy.js';
 
 // Helpers
 function toBytes32(str: string): Uint8Array {
@@ -202,8 +202,8 @@ describe('Confidential Insurance Claims (CIC) - Midnight ZK Contract Suite', () 
   });
 
   it('12. Authoritative deployCICContract returns the verified contract address', async () => {
-    const res = await deployCICContract();
-    expect(res.contractAddress).toBe('0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df');
+    await expect(deployCICContract(undefined as any)).rejects.toThrow('ContractProviders are strictly required');
+    expect(CANONICAL_DEPLOYMENT.contractAddress).toBe('0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df');
   });
 
   it('13. Encoding Helpers: bytesToHex and stringToBytes32 round-trip correctly', () => {

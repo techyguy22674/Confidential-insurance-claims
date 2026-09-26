@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,76 +20,52 @@ export default function Navbar({
     : null;
 
   return (
-    <header className="nav">
-      <Link href="/" className="nav-brand" style={{ display: "flex", alignItems: "center", gap: "0.5rem", textDecoration: "none" }}>
-        <span style={{ fontSize: "1.4rem" }}>🛡️</span>
-        <div>
-          <span style={{ fontWeight: 800, letterSpacing: "-0.02em", color: "#f1f5f9" }}>CIC</span>
-          <span style={{ color: "#64748b", margin: "0 0.4rem" }}>|</span>
-          <span style={{ color: "#e11d48", fontWeight: 700, fontSize: "0.95rem" }}>Confidential Insurance</span>
-        </div>
-      </Link>
+    <header className="navbar-3d">
+      <div className="navbar-container">
+        {/* Brand */}
+        <Link href="/" className="nav-brand-3d">
+          <span className="brand-logo-text">3DVERSE</span>
+          <span className="brand-badge-pill">CIC</span>
+        </Link>
 
-      <div className="nav-links">
-        <Link href="/" className={"nav-link " + (pathname === "/" ? "active" : "")}>
-          Dashboard
-        </Link>
-        <Link href="/claim" className={"nav-link " + (pathname === "/claim" ? "active" : "")}>
-          File & Verify Claim
-        </Link>
-        <Link href="/admin" className={"nav-link " + (pathname === "/admin" ? "active" : "")}>
-          Insurer Console
-        </Link>
-        <Link href="/explorer" className={"nav-link " + (pathname === "/explorer" ? "active" : "")}>
-          Ledger Explorer
-        </Link>
-      </div>
+        {/* Links */}
+        <nav className="nav-menu-3d">
+          <Link href="/" className={`nav-item-3d ${pathname === "/" ? "active" : ""}`}>
+            About
+          </Link>
+          <Link href="/claim" className={`nav-item-3d ${pathname === "/claim" ? "active" : ""}`}>
+            Services
+          </Link>
+          <Link href="/explorer" className={`nav-item-3d ${pathname === "/explorer" ? "active" : ""}`}>
+            Experience
+          </Link>
+          <Link href="/admin" className={`nav-item-3d ${pathname === "/admin" ? "active" : ""}`}>
+            Insurer Admin
+          </Link>
+        </nav>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-        <span className="badge badge-purple" style={{ fontSize: "0.7rem", padding: "0.25rem 0.6rem" }}>
-          Midnight Preview
-        </span>
+        {/* Actions */}
+        <div className="nav-actions-3d">
+          <span className="network-indicator-pill">
+            <span className="indicator-dot" />
+            Midnight Preview
+          </span>
 
-        {walletAddress ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span
-              style={{
-                fontSize: "0.78rem",
-                background: "rgba(16, 185, 129, 0.12)",
-                border: "1px solid rgba(16, 185, 129, 0.4)",
-                color: "#10b981",
-                padding: "0.35rem 0.85rem",
-                borderRadius: "99px",
-                fontWeight: 700,
-                fontFamily: "monospace",
-              }}
-              title={walletAddress}
-            >
-              ✓ {short}
-            </span>
-            <button
-              onClick={onDisconnect}
-              className="btn-secondary"
-              style={{ padding: "0.35rem 0.8rem", fontSize: "0.75rem" }}
-            >
-              Disconnect
+          {walletAddress ? (
+            <div className="wallet-connected-group">
+              <span className="wallet-address-pill" title={walletAddress}>
+                {short}
+              </span>
+              <button onClick={onDisconnect} className="btn-disconnect-3d">
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button onClick={onOpenConnectModal} className="btn-pill-cyan-glow">
+              EXPLORE IN 3D
             </button>
-          </div>
-        ) : (
-          <button
-            id="connect-wallet-btn"
-            onClick={onOpenConnectModal}
-            className="btn-primary"
-            style={{
-              padding: "0.45rem 1rem",
-              fontSize: "0.82rem",
-              background: "linear-gradient(135deg, #e11d48 0%, #be123c 100%)",
-              borderColor: "#e11d48",
-            }}
-          >
-            ⚡ Connect Wallet
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

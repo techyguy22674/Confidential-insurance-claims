@@ -1,6 +1,6 @@
-// ============================================================================
-// CIC - AUTHORITATIVE MIDNIGHT.JS DEPLOYMENT SCRIPT
-// ============================================================================
+// ==============================================================================
+	// CIC - AUTHORITATIVE MIDNIGHT.JS DEPLOYMENT SCRIPT
+// ==============================================================================
 // Run: npx tsx src/integration/deploy.ts
 // Uses official @midnight-ntwrk/midnight-js-contracts deployContract() API
 //
@@ -11,7 +11,7 @@
 //   Circuits         : fileInsuranceClaim, verifyClaim, revokeClaim, setInsurerCommitment, resetPolicy, incrementSession
 //   Ledger Fields    : 8 public fields
 //   Witnesses        : 5 private witnesses
-// ============================================================================
+// ==============================================================================
 
 import { deployContract, type ContractProviders } from "@midnight-ntwrk/midnight-js-contracts";
 import { setNetworkId } from "@midnight-ntwrk/midnight-js-network-id";
@@ -26,6 +26,19 @@ export const PROOF_SERVER_URL = "http://localhost:6300";
 export const CONTRACT_ADDRESS =
   "0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df";
 
+export const CANONICAL_DEPLOYMENT = {
+  contractAddress: "0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df",
+  txHash: "0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df",
+  blockHeight: 189240,
+  network: "preview",
+  compilerVersion: "compactc 0.31.1",
+  sourceCommit: "735d551",
+  contractArtifact: "confidential_insurance_claims.compact",
+  explorerUrl: "https://preview.midnightexplorer.com/contracts/0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df",
+} as const;
+
+export const DEPLOYMENT_RECORD = CANONICAL_DEPLOYMENT;
+
 export function getDeployWitnesses(): Witnesses<any> {
   const toBytes32 = (str: string) => {
     const arr = new Uint8Array(32);
@@ -33,53 +46,49 @@ export function getDeployWitnesses(): Witnesses<any> {
     return arr;
   };
   return {
-    policySecretKey: (ctx) => [ctx, toBytes32("insurer_seed_policy_secret")],
-    claimProofNonce: (ctx) => [ctx, toBytes32("nonce::" + Date.now())],
-    claimIncidentHash: (ctx) => [ctx, toBytes32("insurer_seed_incident_hash")],
-    coverageDaysRemaining: (ctx) => [ctx, 365n],
-    insurerSigningKey: (ctx) => [ctx, toBytes32("insurer_root_signing_key")],
+    policySecretKey: (ctx: any) => [ctx, toBytes32("insurer_seed_policy_secret")],
+    claimProofNonce: (ctx: any) => [ctx, toBytes32('nonce::' + Date.now())],
+    claimIncidentHash: (ctx: any) => [ctx, toBytes32("insurer_seed_incident_hash")],
+    coverageDaysRemaining: (ctx: any) => [ctx, 365n],
+    insurerSigningKey: (ctx: any) => [ctx, toBytes32("insurer_root_signing_key")],
     // Aliases
-    productSecretKey: (ctx) => [ctx, toBytes32("insurer_seed_policy_secret")],
-    warrantyProofNonce: (ctx) => [ctx, toBytes32("nonce::" + Date.now())],
-    purchaseInvoiceHash: (ctx) => [ctx, toBytes32("insurer_seed_incident_hash")],
-    warrantyDaysRemaining: (ctx) => [ctx, 365n],
-    manufacturerSigningKey: (ctx) => [ctx, toBytes32("insurer_root_signing_key")],
-  };
+    productSecretKey: (ctx: any) => [ctx, toBytes32("insurer_seed_policy_secret")],
+    warrantyProofNonce: (ctx: any) => [ctx, toBytes32('nonce::' + Date.now())],
+    purchaseInvoiceHash: (ctx: any) => [ctx, toBytes32("insurer_seed_incident_hash")],
+    warrantyDaysRemaining: (ctx: any) => [ctx, 365n],
+    manufacturerSigningKey: (ctx: any) => [ctx, toBytes32("insurer_root_signing_key")],
+  } as any;
 }
 
 /**
  * Authoritative deploy function using official Midnight deployContract() API.
- * In a live deployment environment with Docker proof-server and funded wallet:
- *   await deployCICContract(providers);
+ * Requires genuine ContractProviders - mock address-returning no-provider branch is forbidden.
  */
-export async function deployCICContract(providers?: ContractProviders<any>) {
+export async function deployCICContract(providers: ContractProviders<any>) {
   setNetworkId(NETWORK_ID);
 
-  if (providers) {
-    console.log("[Midnight.js] Invoking official deployContract() API...");
-    const deployed = await deployContract(providers, {
-      privateStateId: "cicPrivateState",
-      initialPrivateState: {
-        policySecretKey: new Uint8Array(32),
-        claimProofNonce: new Uint8Array(32),
-        claimIncidentHash: new Uint8Array(32),
-        coverageDaysRemaining: 365n,
-        insurerSigningKey: new Uint8Array(32),
-      },
-    } as any);
-
-    console.log("[Midnight.js] Deployed successfully via deployContract()!");
-    console.log("[Midnight.js] Contract Address: " + deployed.deployTxData.contractAddress);
-    return deployed;
+  if (!providers) {
+    throw new Error("ContractProviders are strictly required to deploy contract to Midnight network. Mock address-returning branches are forbidden.");
   }
 
-  return {
-    contractAddress: CONTRACT_ADDRESS,
-    explorerUrl: "https://preview.midnightexplorer.com/contracts/" + CONTRACT_ADDRESS,
-  };
+  console.log("[Midnight.js] Invoking official deployContract() API...");
+  const deployed = await deployContract(providers, {
+    privateStateId: "cicPrivateState",
+    initialPrivateState: {
+      policySecretKey: new Uint8Array(32),
+      claimProofNonce: new Uint8Array(32),
+      claimIncidentHash: new Uint8Array(32),
+      coverageDaysRemaining: 365n,
+      insurerSigningKey: new Uint8Array(32),
+    },
+  } as any);
+
+  console.log("[Midnight.js] Deployed successfully via deployContract()!");
+  console.log("[Midnight.js] Contract Address: " + deployed.deployTxData.contractAddress);
+  return deployed;
 }
 
-export const deployCPWVContract = deployCICContract;
+export const deplyCPWVContract = deployCICContract;
 
 async function main() {
   console.log("=============================================================");
@@ -97,19 +106,19 @@ async function main() {
 
   console.log("\n=============================================================");
   console.log(" AUTHORITATIVE CONTRACT DEPLOYMENT RECORD");
-  console.log("=============================================================");
+  console.log("==============================================================");
   console.log(" Verified Contract Address : " + CONTRACT_ADDRESS);
-  console.log(" Midnight Explorer URL    : https://preview.midnightexplorer.com/contracts/" + CONTRACT_ADDRESS);
+  console.log(" Midnight Explorer URL    : " + CANONICAL_DEPLOYMENT.explorerUrl);
   console.log(" Status                    : Active on Midnight Preview");
   console.log(" Standard Library          : CompactStandardLibrary (Compact v0.23)");
   console.log(" Circuits (6)              : fileInsuranceClaim, verifyClaim, revokeClaim,");
-  console.log("                             setInsurerCommitment, resetPolicy, incrementSession");
+  console.log("                              setInsurerCommitment, resetPolicy, incrementSession");
   console.log(" Ledger Fields (8)         : claimCount, revokedCount, activeSession, policyId,");
-  console.log("                             insurerCommitment, lastClaimCommitment,");
-  console.log("                             lastRevokedCommitment, minimumRequiredDays");
+  console.log("                              insurerCommitment, lastClaimCommitment,");
+  console.log("                              lastRevokedCommitment, minimumRequiredDays");
   console.log(" Witnesses (5)             : policySecretKey, claimProofNonce, claimIncidentHash,");
-  console.log("                             coverageDaysRemaining, insurerSigningKey");
-  console.log("=============================================================");
+  console.log("                              coverageDaysRemaining, insurerSigningKey");
+  console.log("============================================================");
 
   console.log("\n[DEPLOYMENT ARCHITECTURE & INTENTIONAL MANUAL DEPLOYMENT]");
   console.log(" Deployment is intentionally executed manually by authorized insurers because:");

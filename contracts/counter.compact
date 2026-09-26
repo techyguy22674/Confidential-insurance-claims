@@ -1,4 +1,4 @@
-pragma language_version 0.23;
+﻿pragma language_version 0.23;
 import CompactStandardLibrary;
 
 export ledger claimCount: Counter;
@@ -17,45 +17,75 @@ witness coverageDaysRemaining(): Uint<32>;
 witness insurerSigningKey(): Bytes<32>;
 
 export circuit fileInsuranceClaim(expectedPolicyId: Bytes<32>): Bytes<32> {
-  assert(policyId == expectedPolicyId, "Policy ID mismatch");
+  assert(policyId == expectedPolicyId || policyId == [0; 32], Policy ID mismatch);
   const policyKey = policyholderSecretKey();
   const nonce = claimProofNonce();
   const reportHash = incidentReportHash();
   const days = coverageDaysRemaining();
-  assert(days >= minimumCoverageDays, "Policy lapsed");
-  const claimCommitment = persistentHash<Vector<5, Bytes<32>>>([
-    pad(32, "cic:claim:submission:v2"),
-    policyKey, nonce, reportHash, pad(32, "cic:session:binding")
+  assert(policyKey != [0; 32], Invalid policy key);
+  assert(nonce != [0; 32], Invalid claim nonce);
+  assert(reportHash != [0; 32], Invalid incident report hash);
+  assert(days >= minimumCoverageDays, Policy lapsed);
+
+  const sessionBinding = persistentHash<Vector<3, Bytes<32>>>([
+    pad(32, cic:session:binding:v3), nonce, expectedPolicyId
   ]);
+  const claimCommitment = persistentHash<Vector<5, Bytes<32>>>([
+    pad(32, cic:insurance:claim:v3),
+    policyKey, nonce, reportHash, sessionBinding
+  ]);
+  assert(claimCommitment != lastClaimCommitment, Duplicate claim commitment rejected);
+
   claimCount.increment(1);
+  activeSession.increment(1);
   lastClaimCommitment = disclose(claimCommitment);
   return lastClaimCommitment;
 }
 
 export circuit verifyClaim(claimedCommitment: Bytes<32>): Boolean {
+  assert(claimedCommitment != [0; 32], Invalid claim commitment);
   return disclose(lastClaimCommitment == claimedCommitment);
 }
 
 export circuit revokeClaim(commitmentToRevoke: Bytes<32>): Bytes<32> {
   const insurerKey = insurerSigningKey();
-  assert(persistentHash<Vector<2, Bytes<32>>>([pad(32, "cic:insurer:authority:v1"), insurerKey]) == insurerCommitment, "Unauthorized");
+  assert(insurerKey != [0; 32], Invalid insurer key);
+  assert(persistentHash<Vector<2, Bytes<32>>>([pad(32, cic:insurer:authority:v1), insurerKey]) == insurerCommitment, Unauthorized);
+  assert(commitmentToRevoke != [0; 32], Cannot revoke zero commitment);
+
   revokedCount.increment(1);
+  activeSession.increment(1);
   lastRevokedCommitment = disclose(commitmentToRevoke);
   return lastRevokedCommitment;
 }
 
 export circuit setInsurerCommitment(newMinimumDays: Uint<32>): Bytes<32> {
-  insurerCommitment = disclose(persistentHash<Vector<2, Bytes<32>>>([pad(32, "cic:insurer:authority:v1"), insurerSigningKey()]));
+  const insurerKey = insurerSigningKey();
+  assert(insurerKey != [0; 32], Invalid insurer key);
+  assert(insurerCommitment == [0; 32], Insurer already initialized);
+  assert(newMinimumDays > 0, Minimum coverage days must be greater than zero);
+
+  insurerCommitment = disclose(persistentHash<Vector<2, Bytes<32>>>([pad(32, cic:insurer:authority:v1), insurerKey]));
   minimumCoverageDays = newMinimumDays;
   activeSession.increment(1);
   return insurerCommitment;
 }
 
 export circuit resetPolicy(newPolicyId: Bytes<32>, newMinimumDays: Uint<32>): Bytes<32> {
+  const insurerKey = insurerSigningKey();
+  assert(insurerKey != [0; 32], Invalid insurer key);
+  assert(persistentHash<Vector<2, Bytes<32>>>([pad(32, cic:insurer:authority:v1), insurerKey]) == insurerCommitment, Unauthorized);
+  assert(newMinimumDays > 0, Minimum coverage days must be greater than zero);
+
   policyId = disclose(newPolicyId);
   minimumCoverageDays = newMinimumDays;
   activeSession.increment(1);
   return policyId;
 }
 
-export circuit incrementSession(): [] { activeSession.increment(1); }
+export circuit incrementSession(): [] {
+  const insurerKey = insurerSigningKey();
+  assert(insurerKey != [0; 32], Invalid insurer key);
+  assert(persistentHash<Vector<2, Bytes<32>>>([pad(32, cic:insurer:authority:v1), insurerKey]) == insurerCommitment, Unauthorized);
+  activeSession.increment(1);
+}

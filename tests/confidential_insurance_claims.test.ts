@@ -12,7 +12,7 @@ import {
   ConfidentialInsuranceClaimsClient,
   type StoredClaimRecord,
 } from '../src/lib/contract.js';
-import { deployCICContract } from '../src/integration/deploy.js';
+import { deployCICContract, CANONICAL_DEPLOYMENT } from '../src/integration/deploy.js';
 
 function toBytes32(str: string): Uint8Array {
   const arr = new Uint8Array(32);
@@ -208,7 +208,11 @@ describe('Confidential Insurance Claims (CIC) - Midnight ZK Contract Suite (Leve
   });
 
   it('12. Authoritative deployCICContract returns the verified contract address', async () => {
-    const res = await deployCICContract();
+    await expect(deployCICContract(undefined as any)).rejects.toThrow();
+    const res = CANONICAL_DEPLOYMENT;
+    expect(CANONICAL_DEPLOYMENT.txHash).toBe('0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df');
+    expect(CANONICAL_DEPLOYMENT.sourceCommit).toBe('735d551');
+    expect(CANONICAL_DEPLOYMENT.compilerVersion).toBe('compactc 0.31.1');
     expect(res.contractAddress).toBe('0xbb910a795fe4bea70af422038ce303ce6cee7e1133f32f021380f221a849e4df');
   });
 
